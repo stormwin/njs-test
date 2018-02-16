@@ -9,7 +9,7 @@ const express = require('express'),
     // Importing path resolver
     path = require('path');
 
-    
+
 
 
 module.exports = () => {
@@ -26,7 +26,7 @@ module.exports = () => {
     })
 
 
-    glob('../app/models/**/*.js', (err, matches) => {
+    glob('./app/models/**/*.js', (err, matches) => {
 
         // First, we are checking for any errors.
         if (err) {
@@ -34,12 +34,12 @@ module.exports = () => {
             console.error(error);
             return;
         }
-        
+
         // Resolve module
-        matches.map(match => require(path.resolve(match)));
+        matches.map(match => require(match));
     });
 
-    glob('../app/models/**/*.js', (err, matches) => {
+    glob('./app/routes/**/*.js', (err, matches) => {
 
         // First, we are checking for any errors.
         if (err) {
@@ -49,6 +49,6 @@ module.exports = () => {
         }
 
         // Resolve module
-        matches.map(match => require(path.resolve(match)(app)));
+        matches.map(match => require(match(app)));
     });
 }
