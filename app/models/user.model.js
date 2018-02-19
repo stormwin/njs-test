@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-    argon2 = require('argon2'),
+    crypto = require('crypto'),
     Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
@@ -18,7 +18,7 @@ const UserSchema = new Schema({
         required: true
     },
     email: {
-        type: email,
+        type: String,
         required: true,
         unique: true,
         match: [/.+\@.+\..+/, 'Please fill a valid email address']
@@ -43,13 +43,11 @@ const UserSchema = new Schema({
 // Do before save if password is changed or new
 UserSchema.pre('save', function (next) {
     if (this.password && this.isModified('password')) {
-        argon2.hash(this.password)
-            .then(hash => {
-                this.password = hash;
-                return next();
-            }).catch(err => {
-                return next(err);
-            });
+        crypto.pbkdf2(this.password, 'someSaltHere', 100000, 64, 'sha512', (err, derivedKey) => {
+            if (err) return next(err);
+            this.password = derivedKey.toString('hex');
+            next();
+        });
     } else {
         return next();
     }
@@ -64,7 +62,17 @@ UserSchema.set('toObject', { getters: true, virtuals: true, versionKey: false })
 
 // Define method for authentication
 UserSchema.methods.authenticate = function (password) {
-    return argon2.verify(this.password, password);
+    return new Promise((resolve, reject) => {
+        crypto.pbkdf2(password, 'someSaltHere', 100000, 64, 'sha512', (err, derivedKey) => {
+            if (err) return reject(err);
+
+            if(this.password === derivedKey.toString('hex')) {
+                return resolve();
+            }
+
+            return reject();
+        });
+    });
 };
 
 

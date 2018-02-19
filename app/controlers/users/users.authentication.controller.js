@@ -9,13 +9,10 @@ exports.signin = (req, res, next) => {
 };
 
 exports.signup = (req, res, next) => {
-    const user = new User();
 
-    user.assign(req.body);
+    const user = new User(req.body);
 
     user.save()
-        .then(() => {
-            res.json(user);
-        })
-        .catch(error => res.error(error))
+        .then(() => res.json(user))
+        .catch(error => res.json(error))
 }

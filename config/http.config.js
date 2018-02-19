@@ -6,6 +6,8 @@ const express = require('express'),
     // Importing glob. We use glob for searching for files
     glob = require('glob'),
 
+    bodyParser = require('body-parser'),
+
     // Importing path resolver
     path = require('path');
 
@@ -19,6 +21,13 @@ module.exports = () => {
 
     // We want to be only JSON API. Other data formats will be rejected
     express.json();
+
+    app.use(bodyParser.urlencoded({
+        extended: true
+    }));
+    app.use(bodyParser.json());
+
+    app.enable('jsonp callback');
 
     // Set up port to 3000 and start listening
     app.listen(3000, () => {
@@ -36,7 +45,7 @@ module.exports = () => {
         }
 
         // Resolve module
-        matches.map(match => require(match));
+        matches.map(match => require(path.resolve(match)));
     });
 
     glob('./app/routes/**/*.js', (err, matches) => {
@@ -49,6 +58,6 @@ module.exports = () => {
         }
 
         // Resolve module
-        matches.map(match => require(match(app)));
+        matches.map(match => require(path.resolve(match))(app));
     });
 }
