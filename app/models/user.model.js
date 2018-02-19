@@ -67,7 +67,7 @@ UserSchema.methods.authenticate = function (password) {
             if (err) return reject(err);
 
             if(this.password === derivedKey.toString('hex')) {
-                return resolve();
+                return resolve(this);
             }
 
             return reject();

@@ -8,6 +8,8 @@ const express = require('express'),
 
     bodyParser = require('body-parser'),
 
+    passport = require('passport'),
+
     // Importing path resolver
     path = require('path');
 
@@ -27,6 +29,9 @@ module.exports = () => {
     }));
     app.use(bodyParser.json());
 
+    app.use(passport.initialize());
+    app.use(passport.session());
+
     app.enable('jsonp callback');
 
     // Set up port to 3000 and start listening
@@ -35,29 +40,13 @@ module.exports = () => {
     })
 
 
-    glob('./app/models/**/*.js', (err, matches) => {
-
-        // First, we are checking for any errors.
-        if (err) {
-            console.log('Upppsss, cannot find any model :(')
-            console.error(error);
-            return;
-        }
-
-        // Resolve module
-        matches.map(match => require(path.resolve(match)));
+    const models = glob('./app/models/**/*.js', {
+        sync: true
+    });
+    const routes = glob('./app/routes/**/*.js', {
+        sync: true
     });
 
-    glob('./app/routes/**/*.js', (err, matches) => {
-
-        // First, we are checking for any errors.
-        if (err) {
-            console.log('Upppsss, cannot find any routes :(')
-            console.error(error);
-            return;
-        }
-
-        // Resolve module
-        matches.map(match => require(path.resolve(match))(app));
-    });
+    models.map(match => require(path.resolve(match)));
+    routes.map(match => require(path.resolve(match))(app));
 }
