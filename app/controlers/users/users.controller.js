@@ -1,9 +1,15 @@
 'use strict';
+const User = require('mongoose').model('User');
 
 
-exports.requiresLogin = (req, res, next) => {
-    console.log(req);
-    console.log(req.isAuthenticated())
+exports.me = (req, res, next) => {
+    res.json(req.user);
+}
 
-    res.json({});
+exports.getAllUsers = (req, res, next) => {
+    User.find()
+    .select('_id displayName username imageURL')
+    .lean()
+    .then(users => res.json(users))
+    .catch(error => next(error));
 }

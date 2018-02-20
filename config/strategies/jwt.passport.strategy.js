@@ -9,6 +9,11 @@ const passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
     User = require('mongoose').model('User');
 
+const opts = {
+    jwtFromRequest: ExtractJwt.fromHeader('access-token'),
+    secretOrKey: 'secret'
+}
+
 module.exports = () => {
     passport.use(new LocalStrategy({
         usernameField: 'username',
@@ -24,5 +29,12 @@ module.exports = () => {
             })
             .then(user => done(null, user))
             .catch(error => done(error));
+    }));
+
+    passport.use(new JwtStrategy(opts, (jwt, cb) => {
+        return User.findById(jwt.id)
+            .select('-password')
+            .then(user => cb(null, user))
+            .catch(err => cb(err));
     }));
 }

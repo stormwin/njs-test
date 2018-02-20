@@ -7,27 +7,28 @@ const mongoose = require('mongoose'),
 
 
 exports.signin = (req, res, next) => {
-    passport.authenticate('local', (err, user) => {
+    passport.authenticate('local', { session: false }, (err, user) => {
         if (err) {
             return res.status(500).json(err)
         }
-        req.login(user, (err) => {
+        req.login(user, { session: false }, (err) => {
             const expireTime = Date.now() + (168 * 60 * 60 * 1000); // A week from now (168 hrs)
 
             // generate login token
             const tokenPayload = {
-                user: user.id,
+                id: user.id,
                 expires: expireTime
             };
 
             let token = jwt.encode(tokenPayload, 'secret');
             user = user.toJSON();
+            delete user.password;
             user.token = token;
 
             res.json(user);
         });
        
-    })(req, console.log, console.log);
+    })(req, res, console.log);
 };
 
 exports.signup = (req, res, next) => {
