@@ -11,19 +11,29 @@ exports.signin = (req, res, next) => {
         if (err) {
             return res.status(500).json(err)
         }
+
+        const expireTime = Date.now() + (168 * 60 * 60 * 1000); // A week from now (168 hrs)
         req.login(user, { session: false }, (err) => {
-            const expireTime = Date.now() + (168 * 60 * 60 * 1000); // A week from now (168 hrs)
+
+            if(!user || err) return res.status(401).json({error: err || 'Auth failed'});
+
 
             // generate login token
             const tokenPayload = {
+                expires: expireTime,
                 id: user.id,
-                expires: expireTime
             };
 
             let token = jwt.encode(tokenPayload, 'secret');
             user = user.toJSON();
             delete user.password;
-            user.token = token;
+            // user.token = token;
+
+            const result = {
+                user: user,
+                token: token
+            }
+
 
             res.json(user);
         });
