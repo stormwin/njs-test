@@ -15,8 +15,9 @@ exports.signin = (req, res, next) => {
         const expireTime = Date.now() + (168 * 60 * 60 * 1000); // A week from now (168 hrs)
         req.login(user, { session: false }, (err) => {
 
-            if(!user || err) return res.status(401).json({error: err || 'Auth failed'});
+            if (!user || err) return res.status(401).json({ error: err || 'Invalid Username or password' });
 
+            const expireTime = Date.now() + (168 * 60 * 60 * 1000); // A week from now (168 hrs)
 
             // generate login token
             const tokenPayload = {
@@ -37,7 +38,7 @@ exports.signin = (req, res, next) => {
 
             res.json(user);
         });
-       
+
     })(req, res, console.log);
 };
 
